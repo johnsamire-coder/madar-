@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships Membership[]
+  sessions     Session[]
+  socialAccounts SocialAccount[]
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+  socialAccounts SocialAccount[]
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+
+model Membership {
+  id          String        @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  TIKTOK
+}
+
+enum SocialAccountType {
+  PAGE
+  PROFILE
+  BUSINESS
+}
+
+model SocialAccount {
+  id                    String          @id @default(cuid())
+  workspaceId           String
+  userId                String
+  platform              SocialPlatform
+  accountType           SocialAccountType @default(PAGE)
+  externalId            String
+  displayName           String
+  pictureUrl            String?
+  tokenCiphertext       String
+  tokenIv               String
+  tokenTag              String
+  tokenVersion          Int             @default(1)
+  longLivedTokenExpires DateTime?
+  connectedAt           DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  workspace             Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model AuthRateLimit {
+  key         String   @id
+  attempts    Int      @default(1)
+  windowStart DateTime @default(now())
+
+  @@index([windowStart])
+}
