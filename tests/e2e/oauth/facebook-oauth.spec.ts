@@ -57,8 +57,7 @@ test("connect requires a session, builds a valid Facebook dialog request, and st
   expect(dialog.pathname).toMatch(/\/v\d+\.\d+\/dialog\/oauth$/);
   expect(dialog.searchParams.get("client_id")).toBe("400000000000000");
   expect(dialog.searchParams.get("redirect_uri")).toBe("http://127.0.0.1:3100/api/auth/facebook/callback");
-  expect(dialog.searchParams.get("scope")).toContain("pages_manage_posts");
-  expect(dialog.searchParams.get("scope")).toContain("instagram_content_publish");
+  expect(dialog.searchParams.get("scope")).toBeNull();
   expect(dialog.searchParams.get("state")).toMatch(/^[a-f0-9]{48}\.\d{13}$/);
   const stateCookie = (await context.cookies()).find((cookie) => cookie.name === "madar-oauth-state");
   expect(stateCookie?.httpOnly).toBe(true);

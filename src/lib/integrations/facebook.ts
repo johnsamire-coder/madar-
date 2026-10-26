@@ -8,17 +8,6 @@ export type FacebookPage = { id: string; name: string; category?: string; tasks?
 export type FacebookProfile = { id: string; name: string };
 export type LongLivedToken = { token: string; expiresAt: Date | null };
 
-export const FACEBOOK_SCOPES = [
-  "pages_show_list",
-  "pages_manage_posts",
-  "pages_read_engagement",
-  "pages_read_user_content",
-  "instagram_basic",
-  "instagram_content_publish",
-  "instagram_manage_insights",
-  "business_management",
-];
-
 export function facebookConfig(): FacebookConfig | null {
   const appId = process.env.FACEBOOK_APP_ID;
   const appSecret = process.env.FACEBOOK_APP_SECRET;
@@ -37,7 +26,6 @@ export function facebookAuthorizationUrl(config: FacebookConfig, state: string) 
     client_id: config.appId,
     redirect_uri: config.redirectUri,
     state,
-    scope: FACEBOOK_SCOPES.join(","),
   });
   return `https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth?${parameters}`;
 }
